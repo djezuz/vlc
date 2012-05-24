@@ -547,6 +547,29 @@ static char *relative_URI(const char *psz_url, const char *psz_path)
     if (strncmp(psz_path, "http", 4) == 0)
         return NULL;
 
+    /* Absolute path, relative to the current server */
+    if (psz_path[0] == '/')
+    {
+        char* sep = strstr(psz_url, "://");
+        if (sep)
+        {
+            sep = strchr(sep + 3, '/');
+            if (sep)
+            {
+                size_t base_length = sep - psz_url;
+                size_t path_length = strlen(psz_path);
+
+                size_t url_length = base_length + path_length;
+
+                char *psz_res = malloc(url_length + 1);
+                strncpy(psz_res, psz_url, base_length);
+                strncpy(psz_res + base_length, psz_path, path_length);
+                psz_res[url_length] = 0;
+                return psz_res;
+            }
+        }
+    }
+
     char    *path_end = strrchr(psz_url, '/');
     if (path_end == NULL)
         return NULL;
